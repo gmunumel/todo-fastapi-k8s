@@ -1,0 +1,10 @@
+*.log
+*.pyc
+.vscode
+.venv
+.virtualenv
+.python-version
+__pycache__
+todo_fastapi_k8s.egg-info
+.mypy_cache
+build
