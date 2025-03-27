@@ -26,6 +26,9 @@ data_file = ".coverage/coverage-data"
 source = [
   "src",
 ]
+omit = [
+  "src/main.py",
+]
 
 [tool.coverage.xml]
 output = ".coverage/coverage.xml"
