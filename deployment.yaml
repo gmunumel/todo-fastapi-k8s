@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-fastapi-k8s
+  labels:
+    app: todo-fastapi-k8s
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: todo-fastapi-k8s
+  template:
+    metadata:
+      labels:
+        app: todo-fastapi-k8s
+    spec:
+      containers:
+      - name: todo-fastapi-k8s
+        image: 177539010329.dkr.ecr.eu-central-1.amazonaws.com/gminc/todo-fastapi-k8s:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: UVICORN_HOST
+          value: "0.0.0.0"
+        - name: UVICORN_PORT
+          value: "8000"
