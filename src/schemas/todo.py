@@ -6,6 +6,12 @@ class TodoBase(BaseModel):
     description: str | None = None
     completed: bool = False
 
+    def __repr__(self):
+        return (
+            f"TodoBase(title={self.title}, description={self.description}, "
+            f"completed={self.completed})"
+        )
+
 
 class TodoCreate(TodoBase):
     pass
