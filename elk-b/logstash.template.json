@@ -1,0 +1,23 @@
+{
+  "template": "logstash",
+  "index_patterns": ["todo-fastapi-k8s-*"],
+  "settings": {
+    "number_of_shards": 1
+  },
+  "mappings": {
+    "properties": {
+      "message": {
+        "type": "keyword"
+      },
+      "thread": {
+        "type": "integer"
+      },
+      "level": {
+        "type": "keyword"
+      },
+      "@timestamp": {
+        "type": "date"
+      }
+    }
+  }
+}

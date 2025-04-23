@@ -42,7 +42,7 @@ or
 
 ## Deploy to Kubernetes in AWS
 
-    eksctl create cluster --name todo-cluster --region eu-central-1 --nodes 2
+    eksctl create cluster -f cluster-config.yml
 
 ## Create a Docker image
 
@@ -119,8 +119,6 @@ In [deployment.yaml](deployment.yaml) is a Kubernetes manifests for the FastApi 
 
 In [service.yaml](service.yaml) is the service.
 
-## Apply Kubernetes Manifests
-
 ### Apply the deployment and service
 
     kubectl apply -f deployment.yaml
@@ -148,3 +146,74 @@ Now you can access your app `http://<EXTERNAL-IP>`.
 ### Scale your deployment
 
     kubectl scale deployment todo-fastapi-k8s --replicas=3
+
+## Using ELK-B
+
+Sources:
+
+- https://github.com/elkninja/elastic-stack-docker-part-one/tree/main
+- https://github.com/elastic/elasticsearch/blob/8.17/docs/reference/setup/install/docker/docker-compose.yml
+- https://github.com/gnokoheat/elk-with-filebeat-by-docker-compose/tree/master
+- https://discuss.elastic.co/t/invalid-protocol-when-filebeat-send-to-logstash/316681/13?u=gabrielmunumel
+
+Run _ELK_ as docker container using [docker-compose.yml](elk-b/docker-compose.yml).
+
+You can run it as (`-d` is to run on background):
+
+    docker compose -f elk-b/docker-compose.yml up -d
+
+To remove the docker compose (remove volumes too with `-v`):
+
+    docker compose -f elk-b/docker-compose.yml down -v
+
+In case of any error with `Filebeat`, `Logstash`, `ElasticSearch` or `Kibana`:
+
+    docker-compose -f elk-b/docker-compose.yml restart filebeat01
+    docker-compose -f elk-b/docker-compose.yml restart logstash01
+    docker-compose -f elk-b/docker-compose.yml restart es01
+    docker-compose -f elk-b/docker-compose.yml restart kibana
+
+Logstash configuration is in [logstash.conf](elk-b/logstash.conf).
+
+Copy the `es01` certificate:
+
+    docker cp es01:/usr/share/elasticsearch/config/certs/ca/ca.crt /tmp/.
+
+If everything is running fine you would see an index `todo-fastapi-k8s-logs` when run:
+
+    curl --cacert /tmp/ca.crt -u elastic:changeme -X GET "https://localhost:9200/_cat/indices?v"
+
+    or
+
+    curl -X GET "http://localhost:9200/_cat/indices?v"
+
+    docker exec -it filebeat01 curl logstash01:5044
+
+In case Kibana ask for a "Enrollment token", execute this and try again:
+
+    docker exec -it elasticsearch bin/elasticsearch-reset-password -u elastic
+
+### Access Kibana
+
+1.  Open Kibana in your browser: http://localhost:5601.
+2.  User: `elastic` and password: it's in `.env` file.
+3.  Configure an index pattern for `todo-fastapi-k8s-logs` in Kibana to start visualizing logs.
+    - In the Kibana sidebar, click on "Stack Management".
+    - Under the "Kibana" section, click on "Data Views".
+    - Click on "Create a data view"
+4.  Create a data view
+
+    - Define the following fields:
+
+            Name: todo-fastapi-k8s-logs
+            Index pattern: filebeat-*
+            Timestand field: @timestamp
+
+    - Click on "Save data view to Kibana".
+
+5.  Then go to Discover and you should see the logs coming in.
+
+#### Activate Stack Monitoring
+
+1. Go to "Stack Monitoring" in "Management" section on the sidebar.
+2. Click on "Yes" and "Ok".

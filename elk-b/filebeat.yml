@@ -1,0 +1,16 @@
+filebeat.inputs:
+  - type: filestream
+    id: default-filestream
+    paths:
+      - ingest_data/*.log
+
+processors:
+  - add_docker_metadata: ~
+
+output.logstash:
+  hosts: ["logstash01:5044"] # Send logs to Logstash
+  index: filebeat
+
+logging.level: debug
+logging.to_files: false
+logging.to_stderr: true

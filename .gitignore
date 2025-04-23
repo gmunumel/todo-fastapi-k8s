@@ -9,3 +9,4 @@ todo_fastapi_k8s.egg-info
 .mypy_cache
 build
 *.tgz
+todo.db
